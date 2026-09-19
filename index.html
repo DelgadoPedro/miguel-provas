@@ -72,6 +72,10 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.6vw,48px);l
 .wk .rng{font-size:11.5px;margin-top:6px}
 .wk .tg{font-size:11.5px;color:var(--muted);margin-top:6px;display:inline-flex;align-items:center;gap:3px}
 .wk .tg svg{transition:transform .15s}
+.wk .big.lg{font-size:16px;letter-spacing:0}
+.c.wk .big.lg{font-size:14px}
+.day.off{background:repeating-linear-gradient(135deg,var(--card) 0 7px,var(--soft) 7px 14px)}
+.day.off .num{color:var(--line-strong)}
 .wk.now{background:var(--today)!important}
 .c.wk .big{font-size:24px}
 .c.wk .lbl{display:none}
@@ -240,7 +244,7 @@ const SUPABASE_KEY="sb_publishable_isO2JN2q6UZrDh1-cGCwxw_hAieQ82M";    // anon 
 
 const SUBJ=[{k:"M",n:"Matemática"},{k:"P",n:"Português"},{k:"H",n:"História"},{k:"G",n:"Geografia"},{k:"Q",n:"Química"},{k:"F",n:"Física"},{k:"B",n:"Biologia"}];
 const EXAMS=[{n:"IFMG",d:"2026-11-01",t:"13h"},{n:"COLTEC",d:"2026-11-22",t:"14h"},{n:"CEFET-MG",d:"2026-11-29",t:"14h"}];
-const START="2026-09-21";
+const START="2026-09-19";
 const MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
 const DIAS=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const LS="miguel_exercicios_v2", LS_OLD="miguel_exercicios_v1", LS_COL="miguel_recolhidas";
@@ -263,7 +267,10 @@ const wkStart=w=>addDays(FIRST,w*7);
 const wkId=w=>iso(wkStart(w));
 const weekOf=ds=>Math.floor(diff(FIRST,parse(ds))/7);
 const CUR=(()=>{const w=weekOf(TODAY);return w<0?-1:w>=NW?NW:w})();
-const fmtRange=w=>{const a=wkStart(w),b=addDays(a,6);return a.getMonth()===b.getMonth()?`${a.getDate()} a ${b.getDate()} ${MES[b.getMonth()]}`:`${a.getDate()} ${MES[a.getMonth()]} a ${b.getDate()} ${MES[b.getMonth()]}`};
+const START_D=parse(START);
+const wkName=w=>w===0&&START_D>FIRST?"Largada":`Semana ${START_D>FIRST?w:w+1}`;
+const NREG=START_D>FIRST?NW-1:NW;
+const fmtRange=w=>{let a=wkStart(w),b=addDays(a,6);if(a<START_D)a=START_D;if(diff(a,b)===1&&a.getMonth()===b.getMonth())return `${a.getDate()} e ${b.getDate()} ${MES[b.getMonth()]}`;return a.getMonth()===b.getMonth()?`${a.getDate()} a ${b.getDate()} ${MES[b.getMonth()]}`:`${a.getDate()} ${MES[a.getMonth()]} a ${b.getDate()} ${MES[b.getMonth()]}`};
 
 let data={}, goals={};   // data["YYYY-MM-DD"]={M:3}; goals["YYYY-MM-DD" (segunda)]={M:20}
 let db=null, mode="loading";
@@ -287,16 +294,21 @@ function buildCal(){
   let h=`<div class="hd">Faltam</div>`+DIAS.map(d=>`<div class="hd">${d}</div>`).join("")+`<div class="hd sumh">Semana</div>`;
   for(let w=0;w<NW;w++){
     const a=wkStart(w), left=NW-w, now=w===CUR;
-    h+=`<div class="wk w${w}${now?" now":""}"><button type="button" data-w="${w}" aria-expanded="true" aria-label="Semana ${w+1}, ${fmtRange(w)}. Recolher ou expandir">
-      <span class="big">${left}</span><span class="lbl">${left===1?"última semana":"semanas"}</span><span class="rng">${fmtRange(w)}</span><span class="tg">${CHEV}<span class="tgt">recolher</span></span></button></div>`;
+    h+=`<div class="wk w${w}${now?" now":""}"><button type="button" data-w="${w}" aria-expanded="true" aria-label="${wkName(w)}, ${fmtRange(w)}. Recolher ou expandir">
+      ${wkName(w)==="Largada"?`<span class="big lg">Largada</span><span class="lbl">fim de semana</span>`:`<span class="big">${left}</span><span class="lbl">${left===1?"última semana":"semanas"}</span>`}<span class="rng">${fmtRange(w)}</span><span class="tg">${CHEV}<span class="tgt">recolher</span></span></button></div>`;
     for(let i=0;i<7;i++){
       const d=addDays(a,i), ds=iso(d);
       const ex=EXAMS.find(e=>e.d===ds);
       const next=EXAMS.find(e=>e.date>d);
-      const showM=d.getDate()===1||(w===0&&i===0);
+      const showM=d.getDate()===1||(w===0&&iso(d)===START);
       const cls=["day","w"+w];
       if(i>4)cls.push("we"); if(ds===TODAY)cls.push("today"); if(d<today)cls.push("past");
       const head=`<div class="dh"><span class="num">${d.getDate()}${showM?`<small>${MES[d.getMonth()]}</small>`:""}</span>`;
+      if(d<START_D){
+        cls.push("off");
+        h+=`<div class="${cls.join(" ")}" aria-hidden="true">${head}</div></div>`;
+        continue;
+      }
       if(ex){
         cls.push("exam");
         h+=`<div class="${cls.join(" ")}" id="d-${ds}">${head}</div><div class="en">Prova ${ex.n}</div></div>`;
@@ -307,7 +319,7 @@ function buildCal(){
         `<div class="dt"><span>Total</span><b id="t-${ds}">0</b></div></div>`;
     }
     h+=`<div class="sum w${w}" id="w-${w}"><div class="sh"><span></span><span>feito</span><span></span><span>meta</span></div>`+
-      SUBJ.map(s=>`<div class="srow" style="--c:var(--${s.k})"><span class="badge">${s.k}</span><span class="v zero" id="w-${w}-${s.k}">0</span><span class="sl">/</span><input inputmode="numeric" maxlength="3" autocomplete="off" placeholder="meta" data-w="${w}" data-k="${s.k}" aria-label="Meta de ${s.n}, semana ${w+1}"></div>`).join("")+
+      SUBJ.map(s=>`<div class="srow" style="--c:var(--${s.k})"><span class="badge">${s.k}</span><span class="v zero" id="w-${w}-${s.k}">0</span><span class="sl">/</span><input inputmode="numeric" maxlength="3" autocomplete="off" placeholder="meta" data-w="${w}" data-k="${s.k}" aria-label="Meta de ${s.n}, ${wkName(w)}"></div>`).join("")+
       `<div class="st"><span>Total</span><span><b id="w-${w}-T">0</b> <span class="gm" id="w-${w}-goal"></span></span></div></div>`;
   }
   $("cal").innerHTML=h;
@@ -469,8 +481,8 @@ function scheduleDash(){clearTimeout(dashT);dashT=setTimeout(renderDash,200)}
 function rangeDays(){
   let end=today;
   Object.keys(data).forEach(ds=>{if(SUBJ.some(s=>v(ds,s.k)>0)&&parse(ds)>end)end=parse(ds)});
-  if(end<FIRST)end=FIRST; if(end>LAST)end=LAST;
-  const out=[];for(let d=FIRST;d<=end;d=addDays(d,1))out.push(iso(d));return out;
+  if(end<START_D)end=START_D; if(end>LAST)end=LAST;
+  const out=[];for(let d=START_D;d<=end;d=addDays(d,1))out.push(iso(d));return out;
 }
 function renderDash(){
   const days=rangeDays();
@@ -483,8 +495,8 @@ function renderDash(){
   let thisWeek=0,ng=0,hit=0;
   SUBJ.forEach(s=>{const x=weekSum(cw,s.k),m=g(cw,s.k);thisWeek+=x;if(m>0){ng++;if(x>=m)hit++}});
   $("kpis").innerHTML=[
-    ["Total de exercícios",all,"desde 21 de set"],
-    ["Nesta semana",thisWeek,`semana ${cw+1} de ${NW}`],
+    ["Total de exercícios",all,`desde ${START_D.getDate()} de ${MES[START_D.getMonth()]}`],
+    ["Nesta semana",thisWeek,(wkName(cw)==="Largada"?"largada":`${wkName(cw).toLowerCase()} de ${NREG}`)],
     ["Metas batidas",ng?`${hit} de ${ng}`:"–",ng?"nesta semana":"sem metas nesta semana"],
     ["Média por dia",(all/span).toFixed(1).replace(".",","),`em ${span} ${span===1?"dia":"dias"}`],
     ["Dias com exercício",studied,`de ${days.length}`],
@@ -502,7 +514,7 @@ function renderDash(){
   const tip={backgroundColor:card,titleColor:ink,bodyColor:ink,footerColor:ink,borderColor:cssv("--line-strong"),borderWidth:1,padding:10};
 
   /* metas da semana */
-  $("wLabel").textContent=`Semana ${gw+1}, ${fmtRange(gw)}`;
+  $("wLabel").textContent=`${wkName(gw)}, ${fmtRange(gw)}`;
   $("wPrev").disabled=gw<=0; $("wNext").disabled=gw>=NW-1;
   const gm=SUBJ.map(s=>g(gw,s.k)), gd=SUBJ.map(s=>weekSum(gw,s.k));
   const gng=gm.filter(x=>x>0).length, ghit=gm.filter((m,i)=>m>0&&gd[i]>=m).length;
@@ -524,9 +536,9 @@ function renderDash(){
     days.forEach(ds=>{const d=parse(ds),w=weekOf(ds);labels.push(`${d.getDate()}/${d.getMonth()+1}`);SUBJ.forEach(s=>per[s.k].push(v(ds,s.k)));
 });
   }else{
-    const nw=Math.ceil(days.length/7);
+    const nw=weekOf(days[days.length-1])+1;
     for(let i=0;i<nw;i++){
-      const a=wkStart(i);labels.push(`Sem ${i+1} (${a.getDate()}/${a.getMonth()+1})`);
+      const a=wkStart(i),a2=a<START_D?START_D:a;labels.push(`${wkName(i).replace("Semana","Sem")} (${a2.getDate()}/${a2.getMonth()+1})`);
       SUBJ.forEach(s=>{let x=0;for(let j=0;j<7;j++){const ds=iso(addDays(a,j));if(days.includes(ds))x+=v(ds,s.k)}per[s.k].push(x)});
       const m=vis.reduce((a,s)=>a+g(i,s.k),0);goalLine.push(m||null);
     }
@@ -551,8 +563,8 @@ function renderDash(){
 }
 function renderMsgs(dayTot,streak,cw,all){
   const out=[];
-  const past=[];for(let d=FIRST;d<=today&&d<=LAST;d=addDays(d,1))past.push(iso(d));
-  const started=today>=FIRST;
+  const past=[];for(let d=START_D;d<=today&&d<=LAST;d=addDays(d,1))past.push(iso(d));
+  const started=today>=START_D;
   // sequência
   if(streak>=7)out.push(["good","🔥",`${streak} dias seguidos!`,"Ritmo de campeão. Não deixa a corrente quebrar."]);
   else if(streak>=3)out.push(["good","🔥",`${streak} dias seguidos`,`Mais ${7-streak} e fecha uma semana inteira sem parar.`]);
@@ -564,7 +576,7 @@ function renderMsgs(dayTot,streak,cw,all){
     if(gap>=3)out.push(["warn","⏰",`${gap} dias sem exercício`,"Recomeçar é fácil: escolhe uma matéria e faz 5 exercícios hoje."]);
     else if(!todayDone&&streak>0)out.push(["info","💪","Ainda falta o de hoje",`Faz os exercícios de hoje pra manter a sequência de ${streak} ${streak===1?"dia":"dias"}.`]);
     else if(!todayDone)out.push(["info","✏️","Bora começar o dia?","Nenhum exercício anotado hoje ainda."]);
-  }else out.push(["info","🚀","A contagem começa em 21 de setembro","Já dá pra definir as metas da primeira semana."]);
+  }else out.push(["info","🚀",`A contagem começa em ${START_D.getDate()} de ${MES[START_D.getMonth()]}`,"Já dá pra definir as metas da primeira semana."]);
   // metas da semana
   if(cw>=0&&cw<NW&&started){
     const withG=SUBJ.filter(s=>g(cw,s.k)>0);

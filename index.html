@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miguel rumo às provas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --soft:#f5f7fa; --ink:#1b2130; --muted:#667085; --line:#d5dbe4; --line-strong:#aeb7c5;
+  --accent:#2f5bd3; --hl:#ffe98a; --hl-ink:#3d3200; --on-subj:#ffffff; --today:#e8eeff;
+  --sumbg:#e9eefb; --ok:#1d8a4a; --okbg:#dff5e6;
+  --M:#2f5bd3; --P:#d6336c; --H:#b7791f; --G:#7048e8; --Q:#e8590c; --F:#0b95a8; --B:#2f9e44;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161d; --card:#1c222c; --soft:#232a36; --ink:#e8ebf1; --muted:#98a1b3; --line:#313949; --line-strong:#4a5467;
+    --accent:#7d9bf2; --hl:#5a4b12; --hl-ink:#ffe9a3; --on-subj:#10141b; --today:#223055;
+    --sumbg:#1f2a44; --ok:#5fd07a; --okbg:#173524;
+    --M:#7d9bf2; --P:#f27aa3; --H:#e3ac4a; --G:#a38bfa; --Q:#ff9150; --F:#35c3d8; --B:#5fd07a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161d; --card:#1c222c; --soft:#232a36; --ink:#e8ebf1; --muted:#98a1b3; --line:#313949; --line-strong:#4a5467;
+  --accent:#7d9bf2; --hl:#5a4b12; --hl-ink:#ffe9a3; --on-subj:#10141b; --today:#223055;
+  --sumbg:#1f2a44; --ok:#5fd07a; --okbg:#173524;
+  --M:#7d9bf2; --P:#f27aa3; --H:#e3ac4a; --G:#a38bfa; --Q:#ff9150; --F:#35c3d8; --B:#5fd07a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.4;padding:24px clamp(12px,3vw,32px) 64px}
+.wrap{max-width:1280px;margin:0 auto}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:18px 24px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.6vw,48px);line-height:1;letter-spacing:-.02em}
+.sub{color:var(--muted);margin-top:8px;max-width:64ch}
+.exams{display:flex;gap:10px;flex-wrap:wrap}
+.exam{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:132px}
+.exam .n{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1}
+.exam .d{font-size:13px;color:var(--muted)}
+.exam .f{margin-top:6px;font-size:13px}
+.exam .f b{font-family:var(--display);font-size:22px;font-weight:800;margin-right:3px}
+.exam.done{opacity:.55}
+
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:12px}
+.bar h2{font-family:var(--display);font-size:22px;font-weight:700;margin-right:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
+.legend>span{display:inline-flex;align-items:center;gap:5px}
+.badge{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--c);color:var(--on-subj);font-size:10.5px;font-weight:700;line-height:1;flex:none}
+.btn{background:var(--card);color:var(--ink);border:1px solid var(--line-strong);border-radius:9px;padding:6px 12px;font-size:14px}
+.btn:hover{border-color:var(--accent)}
+.status{font-size:13px;color:var(--muted);min-width:110px;text-align:right}
+
+/* calendário */
+.scroll{overflow-x:auto;border-radius:14px;border:1px solid var(--line-strong);background:var(--line)}
+.cal{display:grid;grid-template-columns:84px repeat(7,minmax(100px,1fr)) 176px;gap:1px;min-width:1080px}
+.cal>div{background:var(--card);min-width:0}
+.hd{background:var(--soft)!important;font-weight:700;font-size:13px;text-align:center;padding:8px 4px;color:var(--muted)}
+.hd.sumh{background:var(--sumbg)!important;color:var(--ink);box-shadow:inset 3px 0 0 var(--accent)}
+
+.wk{background:var(--soft)!important;padding:0}
+.wk button{all:unset;box-sizing:border-box;width:100%;height:100%;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;cursor:pointer}
+.wk button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.wk button:hover .tg{color:var(--accent)}
+.wk .big{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em}
+.wk .lbl{font-size:11.5px;color:var(--muted);line-height:1.2}
+.wk .rng{font-size:11.5px;margin-top:6px}
+.wk .tg{font-size:11.5px;color:var(--muted);margin-top:6px;display:inline-flex;align-items:center;gap:3px}
+.wk .tg svg{transition:transform .15s}
+.wk.now{background:var(--today)!important}
+.c.wk .big{font-size:24px}
+.c.wk .lbl{display:none}
+.c.wk .tg svg{transform:rotate(-90deg)}
+
+.day{padding:7px 8px;display:flex;flex-direction:column;gap:3px}
+.day .dh{display:flex;justify-content:space-between;align-items:baseline;gap:4px;margin-bottom:2px}
+.day .num{font-family:var(--display);font-weight:700;font-size:16px;line-height:1}
+.day .num small{font-family:var(--body);font-size:11px;color:var(--muted);font-weight:700;margin-left:3px}
+.day .cd{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:grid;grid-template-columns:18px 1fr;gap:5px;align-items:center}
+.row input{width:100%;height:23px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);text-align:center;font:inherit;font-size:13.5px;padding:0 2px}
+.row input::placeholder{color:var(--line-strong)}
+.row input.filled{border-color:var(--c);font-weight:700;background:color-mix(in srgb,var(--c) 10%,var(--card))}
+.row input:focus-visible{outline:2px solid var(--c);outline-offset:0;border-color:var(--c)}
+.day .dt{margin-top:auto;padding-top:4px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.day .dt b{color:var(--ink);font-size:13px}
+.day.we{background:color-mix(in srgb,var(--soft) 55%,var(--card))}
+.day.today{box-shadow:inset 0 0 0 2px var(--accent);background:var(--today)}
+.day.past .num{color:var(--muted)}
+.day.exam{background:var(--hl);color:var(--hl-ink)}
+.day.exam .num{color:var(--hl-ink)}
+.day.exam .en{flex:1;display:grid;place-items:center;text-align:center;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;text-transform:uppercase;letter-spacing:.01em;padding:6px 0}
+
+/* coluna da semana: feito / meta */
+.sum{background:var(--sumbg)!important;box-shadow:inset 3px 0 0 var(--accent);padding:7px 8px 7px 11px;display:flex;flex-direction:column;gap:3px}
+.sum .sh{display:grid;grid-template-columns:18px 1fr 10px 50px;gap:5px;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:2px}
+.sum .sh span:nth-child(2),.sum .sh span:nth-child(4){text-align:center}
+.srow{display:grid;grid-template-columns:18px 1fr 10px 50px;gap:5px;align-items:center}
+.srow .v{height:23px;display:flex;align-items:center;justify-content:center;gap:3px;font-size:13.5px;font-weight:700;border-radius:6px;background:var(--card);border:1px solid var(--line)}
+.srow .v.zero{font-weight:400;color:var(--muted)}
+.srow .v.hit{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.srow .sl{color:var(--muted);text-align:center;font-size:12px}
+.srow input{width:100%;height:23px;border:1px dashed var(--line-strong);border-radius:6px;background:transparent;color:var(--ink);text-align:center;font:inherit;font-size:13px;padding:0 2px}
+.srow input.set{border-style:solid;border-color:var(--c);font-weight:700;background:var(--card)}
+.srow input::placeholder{color:var(--line-strong);font-size:11px}
+.sum .st{margin-top:auto;padding-top:5px;border-top:2px solid var(--accent);display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12px}
+.sum .st b{font-family:var(--display);font-size:20px}
+.sum .st .gm{color:var(--muted);font-size:12.5px}
+.sum .st .gm.hit{color:var(--ok);font-weight:700}
+
+/* semana recolhida */
+.c.day .row,.c.day .cd,.c.sum .srow,.c.sum .sh{display:none}
+.c.day{flex-direction:row;align-items:center;justify-content:space-between;padding:7px 8px}
+.c.day .dh{margin:0}
+.c.day .dt{margin:0;border:0;padding:0;gap:5px}
+.c.day .dt span{font-size:11px}
+.c.day.exam{justify-content:flex-start;gap:8px}
+.c.day.exam .en{font-size:13px;padding:0;flex:1}
+.c.wk button{flex-direction:row;flex-wrap:wrap;gap:2px 6px;padding:6px}
+.c.wk .big{font-size:20px}
+.c.wk .rng,.c.wk .tg{margin-top:0}
+.c.wk .rng{display:none}
+.c.sum{justify-content:center;padding-top:6px;padding-bottom:6px}
+.c.sum .st{margin:0;border:0;padding:0}
+.c.sum .st b{font-size:16px}
+
+/* painel */
+.dash{margin-top:40px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .k{font-size:13px;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1;margin-top:2px}
+.kpi .x{font-size:12.5px;color:var(--muted)}
+.msgs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.msg{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--tone);border-radius:12px;padding:9px 14px 9px 11px;flex:1 1 250px;max-width:100%}
+.msg .ic{font-size:22px;line-height:1;flex:none}
+.msg b{display:block;font-family:var(--display);font-size:15px;line-height:1.2}
+.msg span{font-size:13px;color:var(--muted);line-height:1.3}
+.msg.good{--tone:var(--ok)} .msg.warn{--tone:#e0a100} .msg.info{--tone:var(--accent)}
+.updated{margin-top:22px;font-size:12.5px;color:var(--muted);text-align:center}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px}
+.panel h3{font-family:var(--display);font-size:17px;font-weight:700}
+.panel .ph{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel .note{font-size:13px;color:var(--muted)}
+.mt{margin-top:14px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden}
+.seg button{background:var(--card);color:var(--ink);border:0;padding:6px 14px;font-size:14px}
+.seg button+button{border-left:1px solid var(--line-strong)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--card);font-weight:700}
+.wnav{display:inline-flex;align-items:center;gap:8px}
+.wnav button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font-size:16px;line-height:1}
+.wnav button:disabled{opacity:.35;cursor:default}
+.wnav span{min-width:150px;text-align:center;font-size:14px;font-weight:700}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 10px 4px 5px;font-size:13px}
+.filters button[aria-pressed="false"]{opacity:.45}
+.filters button[aria-pressed="false"] .badge{background:var(--line-strong)}
+.chart{position:relative;height:300px}
+.chart.sm{height:280px}
+.chart.goal{height:260px}
+.empty[hidden]{display:none}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:14px;padding:20px}
+.keyline{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.keyline i{display:inline-block;width:18px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Miguel rumo às provas</h1>
+      <p class="sub">Anote quantos exercícios fez de cada matéria em cada dia. Na coluna Semana, defina a meta de cada matéria; a soma e o painel se atualizam sozinhos.</p>
+    </div>
+    <div class="exams" id="exams"></div>
+  </header>
+
+  <div class="bar">
+    <h2>Calendário de exercícios</h2>
+    <div class="legend" id="legend"></div>
+    <button class="btn" type="button" id="toggleFuture">Recolher semanas futuras</button>
+    <button class="btn" type="button" id="goToday">Ir para hoje</button>
+    <span class="status" id="status" aria-live="polite">Carregando…</span>
+  </div>
+  <div class="scroll"><div class="cal" id="cal"></div></div>
+
+  <section class="dash">
+    <div class="bar"><h2>Painel</h2></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+
+    <div class="panel">
+      <div class="ph">
+        <div><h3>Metas da semana</h3><div class="note" id="goalNote"></div></div>
+        <div class="wnav">
+          <button type="button" id="wPrev" aria-label="Semana anterior">‹</button>
+          <span id="wLabel"></span>
+          <button type="button" id="wNext" aria-label="Próxima semana">›</button>
+        </div>
+      </div>
+      <div class="keyline"><span><i style="border:2px solid var(--muted)"></i>Meta</span><span><i style="background:var(--muted)"></i>Feito</span></div>
+      <div class="chart goal"><canvas id="c0" aria-label="Feito e meta por matéria na semana"></canvas><div class="empty" id="goalEmpty" hidden>Nenhuma meta nesta semana. Defina as metas na coluna Semana do calendário.</div></div>
+    </div>
+
+    <div class="panel mt">
+      <div class="ph">
+        <h3 id="c1title">Exercícios por dia</h3>
+        <div class="seg" role="group" aria-label="Agrupar por">
+          <button type="button" data-g="day" aria-pressed="true">Por dia</button>
+          <button type="button" data-g="week" aria-pressed="false">Por semana</button>
+        </div>
+      </div>
+      <div class="filters" id="filters" style="margin-bottom:10px"></div>
+      <div class="keyline" id="c1key"></div>
+      <div class="chart"><canvas id="c1" aria-label="Exercícios por período e matéria"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Acumulado por matéria</h3></div><div class="chart sm"><canvas id="c2" aria-label="Exercícios acumulados por matéria"></canvas></div></div>
+      <div class="panel"><div class="ph"><h3>Total por matéria</h3></div><div class="chart sm"><canvas id="c3" aria-label="Total de exercícios por matéria"></canvas></div></div>
+    </div>
+  </section>
+  <p class="updated" id="updated"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+<script>
+/* ====== CONFIGURAÇÃO: cole aqui os dados do seu projeto Supabase ======
+   Supabase > Project Settings > API (ou "Connect")                       */
+const SUPABASE_URL="https://hgczcfuzlcbkacawcziv.supabase.co";      // ex.: https://abcdefgh.supabase.co
+const SUPABASE_KEY="sb_publishable_isO2JN2q6UZrDh1-cGCwxw_hAieQ82M";    // anon key ou publishable key (nunca a service_role/secret)
+/* ===================================================================== */
+
+const SUBJ=[{k:"M",n:"Matemática"},{k:"P",n:"Português"},{k:"H",n:"História"},{k:"G",n:"Geografia"},{k:"Q",n:"Química"},{k:"F",n:"Física"},{k:"B",n:"Biologia"}];
+const EXAMS=[{n:"IFMG",d:"2026-11-01",t:"13h"},{n:"COLTEC",d:"2026-11-22",t:"14h"},{n:"CEFET-MG",d:"2026-11-29",t:"14h"}];
+const START="2026-09-21";
+const MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const DIAS=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+const LS="miguel_exercicios_v2", LS_OLD="miguel_exercicios_v1", LS_COL="miguel_recolhidas";
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const diff=(a,b)=>Math.round((b-a)/864e5);
+const mondayOf=d=>addDays(d,-((d.getDay()+6)%7));
+const today=(()=>{const t=new Date();t.setHours(0,0,0,0);return t})();
+const TODAY=iso(today);
+EXAMS.forEach(e=>e.date=parse(e.d));
+const FIRST=mondayOf(parse(START));
+const LAST=addDays(mondayOf(EXAMS[EXAMS.length-1].date),6);
+const NW=Math.round((diff(FIRST,LAST)+1)/7);
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const wkStart=w=>addDays(FIRST,w*7);
+const wkId=w=>iso(wkStart(w));
+const weekOf=ds=>Math.floor(diff(FIRST,parse(ds))/7);
+const CUR=(()=>{const w=weekOf(TODAY);return w<0?-1:w>=NW?NW:w})();
+const fmtRange=w=>{const a=wkStart(w),b=addDays(a,6);return a.getMonth()===b.getMonth()?`${a.getDate()} a ${b.getDate()} ${MES[b.getMonth()]}`:`${a.getDate()} ${MES[a.getMonth()]} a ${b.getDate()} ${MES[b.getMonth()]}`};
+
+let data={}, goals={};   // data["YYYY-MM-DD"]={M:3}; goals["YYYY-MM-DD" (segunda)]={M:20}
+let db=null, mode="loading";
+const timers=new Map(), inflight=new Map();
+const v=(d,k)=>(data[d]&&+data[d][k])||0;
+const g=(w,k)=>(goals[wkId(w)]&&+goals[wkId(w)][k])||0;
+const weekSum=(w,k)=>{let x=0;const a=wkStart(w);for(let i=0;i<7;i++)x+=v(iso(addDays(a,i)),k);return x};
+
+/* ---------- cabeçalho ---------- */
+function renderExams(){
+  $("exams").innerHTML=EXAMS.map(e=>{
+    const f=diff(today,e.date);
+    const txt=f>1?`<b>${f}</b>dias`:f===1?`<b>1</b>dia`:f===0?`<b>Hoje</b>`:`já foi`;
+    return `<div class="exam${f<0?" done":""}"><div class="n">${e.n}</div><div class="d">${e.date.getDate()} de ${MES[e.date.getMonth()]}, ${e.t}</div><div class="f">${f>0?"faltam ":""}${txt}</div></div>`}).join("");
+  $("legend").innerHTML=SUBJ.map(s=>`<span><span class="badge" style="--c:var(--${s.k})">${s.k}</span>${s.n}</span>`).join("");
+}
+
+/* ---------- calendário ---------- */
+const CHEV=`<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function buildCal(){
+  let h=`<div class="hd">Faltam</div>`+DIAS.map(d=>`<div class="hd">${d}</div>`).join("")+`<div class="hd sumh">Semana</div>`;
+  for(let w=0;w<NW;w++){
+    const a=wkStart(w), left=NW-w, now=w===CUR;
+    h+=`<div class="wk w${w}${now?" now":""}"><button type="button" data-w="${w}" aria-expanded="true" aria-label="Semana ${w+1}, ${fmtRange(w)}. Recolher ou expandir">
+      <span class="big">${left}</span><span class="lbl">${left===1?"última semana":"semanas"}</span><span class="rng">${fmtRange(w)}</span><span class="tg">${CHEV}<span class="tgt">recolher</span></span></button></div>`;
+    for(let i=0;i<7;i++){
+      const d=addDays(a,i), ds=iso(d);
+      const ex=EXAMS.find(e=>e.d===ds);
+      const next=EXAMS.find(e=>e.date>d);
+      const showM=d.getDate()===1||(w===0&&i===0);
+      const cls=["day","w"+w];
+      if(i>4)cls.push("we"); if(ds===TODAY)cls.push("today"); if(d<today)cls.push("past");
+      const head=`<div class="dh"><span class="num">${d.getDate()}${showM?`<small>${MES[d.getMonth()]}</small>`:""}</span>`;
+      if(ex){
+        cls.push("exam");
+        h+=`<div class="${cls.join(" ")}" id="d-${ds}">${head}</div><div class="en">Prova ${ex.n}</div></div>`;
+        continue;
+      }
+      h+=`<div class="${cls.join(" ")}" id="d-${ds}">${head}</div>`+
+        SUBJ.map(s=>`<label class="row" style="--c:var(--${s.k})"><span class="badge">${s.k}</span><input inputmode="numeric" maxlength="3" autocomplete="off" placeholder="–" data-d="${ds}" data-k="${s.k}" aria-label="${s.n}, ${d.getDate()} de ${MES[d.getMonth()]}"></label>`).join("")+
+        `<div class="dt"><span>Total</span><b id="t-${ds}">0</b></div></div>`;
+    }
+    h+=`<div class="sum w${w}" id="w-${w}"><div class="sh"><span></span><span>feito</span><span></span><span>meta</span></div>`+
+      SUBJ.map(s=>`<div class="srow" style="--c:var(--${s.k})"><span class="badge">${s.k}</span><span class="v zero" id="w-${w}-${s.k}">0</span><span class="sl">/</span><input inputmode="numeric" maxlength="3" autocomplete="off" placeholder="meta" data-w="${w}" data-k="${s.k}" aria-label="Meta de ${s.n}, semana ${w+1}"></div>`).join("")+
+      `<div class="st"><span>Total</span><span><b id="w-${w}-T">0</b> <span class="gm" id="w-${w}-goal"></span></span></div></div>`;
+  }
+  $("cal").innerHTML=h;
+}
+function fillInputs(ds){
+  document.querySelectorAll(`input[data-d="${ds}"]`).forEach(inp=>{
+    if(document.activeElement===inp)return;
+    const n=v(ds,inp.dataset.k); inp.value=n?n:""; inp.classList.toggle("filled",n>0);
+  });
+}
+function fillGoals(w){
+  document.querySelectorAll(`input[data-w="${w}"]`).forEach(inp=>{
+    if(document.activeElement===inp)return;
+    const n=g(w,inp.dataset.k); inp.value=n?n:""; inp.classList.toggle("set",n>0);
+  });
+}
+function updateWeek(w){
+  if(w<0||w>=NW)return;
+  let tot=0,gt=0,hit=0,ng=0;
+  SUBJ.forEach(s=>{
+    const x=weekSum(w,s.k), m=g(w,s.k); tot+=x; gt+=m;
+    if(m>0){ng++; if(x>=m)hit++;}
+    const el=$(`w-${w}-${s.k}`);
+    el.textContent=(m>0&&x>=m)?`${x} ✓`:x;
+    el.classList.toggle("zero",!x); el.classList.toggle("hit",m>0&&x>=m);
+  });
+  $(`w-${w}-T`).textContent=tot;
+  const gm=$(`w-${w}-goal`);
+  gm.textContent=gt?`/ ${gt}`:""; gm.classList.toggle("hit",gt>0&&tot>=gt);
+  gm.title=ng?`${hit} de ${ng} metas batidas`:"";
+}
+function updateDay(ds){
+  const t=$("t-"+ds); if(t)t.textContent=SUBJ.reduce((a,s)=>a+v(ds,s.k),0);
+  updateWeek(weekOf(ds));
+}
+function refreshAll(){
+  for(let i=0;i<NW*7;i++){const ds=iso(addDays(FIRST,i));fillInputs(ds);const t=$("t-"+ds);if(t)t.textContent=SUBJ.reduce((a,s)=>a+v(ds,s.k),0)}
+  for(let w=0;w<NW;w++){fillGoals(w);updateWeek(w)}
+  scheduleDash();
+}
+const clean3=inp=>{const c=inp.value.replace(/\D/g,"").slice(0,3);if(c!==inp.value)inp.value=c;return +c||0};
+$("cal").addEventListener("input",e=>{
+  const inp=e.target; if(inp.tagName!=="INPUT")return;
+  const n=clean3(inp), k=inp.dataset.k;
+  if(inp.dataset.d){
+    const ds=inp.dataset.d;
+    data[ds]={...(data[ds]||{}),_t:Date.now()}; if(n)data[ds][k]=n; else delete data[ds][k];
+    inp.classList.toggle("filled",n>0); updateDay(ds); scheduleSave("dias",ds);
+  }else if(inp.dataset.w){
+    const w=+inp.dataset.w, id=wkId(w);
+    goals[id]={...(goals[id]||{}),_t:Date.now()}; if(n)goals[id][k]=n; else delete goals[id][k];
+    inp.classList.toggle("set",n>0); updateWeek(w); scheduleSave("metas",id);
+  }
+  scheduleDash();
+});
+$("cal").addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||e.target.tagName!=="INPUT")return;
+  e.preventDefault();
+  const sel=e.target.dataset.d?"#cal input[data-d]":"#cal input[data-w]";
+  const all=[...document.querySelectorAll(sel)].filter(i=>i.offsetParent); const i=all.indexOf(e.target);
+  if(all[i+1])all[i+1].focus();
+});
+
+/* recolher semanas */
+let collapsed=new Set();
+try{const s=JSON.parse(localStorage.getItem(LS_COL));if(Array.isArray(s))collapsed=new Set(s);else throw 0}catch(e){for(let w=Math.max(CUR,0)+2;w<NW;w++)collapsed.add(w)}
+function applyCollapse(){
+  for(let w=0;w<NW;w++){
+    const c=collapsed.has(w);
+    document.querySelectorAll(".w"+w).forEach(el=>el.classList.toggle("c",c));
+    const b=document.querySelector(`.wk.w${w} button`); b.setAttribute("aria-expanded",!c);
+    b.querySelector(".tgt").textContent=c?"expandir":"recolher";
+  }
+  const fut=[];for(let w=Math.max(CUR,0)+1;w<NW;w++)fut.push(w);
+  $("toggleFuture").textContent=fut.length&&fut.every(w=>collapsed.has(w))?"Expandir semanas futuras":"Recolher semanas futuras";
+  try{localStorage.setItem(LS_COL,JSON.stringify([...collapsed]))}catch(e){}
+}
+$("cal").addEventListener("click",e=>{
+  const b=e.target.closest(".wk button"); if(!b)return;
+  const w=+b.dataset.w; collapsed.has(w)?collapsed.delete(w):collapsed.add(w); applyCollapse();
+});
+$("toggleFuture").onclick=()=>{
+  const fut=[];for(let w=Math.max(CUR,0)+1;w<NW;w++)fut.push(w);
+  const all=fut.every(w=>collapsed.has(w));
+  fut.forEach(w=>all?collapsed.delete(w):collapsed.add(w)); applyCollapse();
+};
+$("goToday").onclick=()=>{
+  const w=Math.min(Math.max(CUR,0),NW-1);
+  if(collapsed.has(w)){collapsed.delete(w);applyCollapse()}
+  const el=$("d-"+TODAY)||document.querySelector(`.wk.w${w}`);
+  el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center",inline:"center"});
+  const inp=el.querySelector("input"); if(inp)setTimeout(()=>inp.focus({preventScroll:true}),350);
+};
+
+/* ---------- salvar (Supabase) ---------- */
+function setStatus(t){$("status").textContent=t}
+function idle(){return !timers.size&&!inflight.size}
+function scheduleSave(coll,id){
+  const key=coll+"/"+id;
+  clearTimeout(timers.get(key)); setStatus("Salvando…");
+  timers.set(key,setTimeout(()=>{timers.delete(key);saveNow(coll,id)},700));
+}
+function saveLocal(){
+  try{localStorage.setItem(LS,JSON.stringify({dias:data,metas:goals}));setStatus("Salvo neste navegador")}catch(e){setStatus("Não foi possível salvar")}
+}
+function saveNow(coll,id){
+  if(mode!=="db")return saveLocal();
+  const key=coll+"/"+id, src=coll==="dias"?data:goals, valores={...(src[id]||{})};
+  const p=(inflight.get(key)||Promise.resolve()).then(async()=>{
+    const {error}=await db.from(coll).upsert({id,valores});
+    if(error)throw error;
+  });
+  inflight.set(key,p);
+  p.then(()=>{if(inflight.get(key)===p)inflight.delete(key);if(idle())setStatus("Salvo")})
+   .catch(err=>{inflight.delete(key);console.error(err);setStatus("Erro ao salvar, tente de novo")});
+}
+function applyRow(coll,row,removed){
+  const store=coll==="dias"?data:goals, id=row.id, key=coll+"/"+id;
+  if(timers.has(key)||inflight.has(key))return;
+  if(removed)delete store[id]; else store[id]={...(row.valores||{})};
+  if(coll==="dias"){fillInputs(id);updateDay(id)}
+  else{const w=weekOf(id);if(w>=0&&w<NW){fillGoals(w);updateWeek(w)}}
+}
+async function loadAll(){
+  const [d,m]=await Promise.all([db.from("dias").select("id,valores"),db.from("metas").select("id,valores")]);
+  if(d.error||m.error)throw (d.error||m.error);
+  d.data.forEach(r=>applyRow("dias",r,false));
+  m.data.forEach(r=>applyRow("metas",r,false));
+  if(idle())setStatus("Salvo");
+  scheduleDash();
+}
+async function initStore(){
+  const ok=typeof supabase!=="undefined"&&SUPABASE_URL.startsWith("https://")&&SUPABASE_KEY.length>20;
+  if(ok){
+    try{
+      db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY); mode="db";
+      await loadAll();
+      db.channel("quadro")
+        .on("postgres_changes",{event:"*",schema:"public",table:"dias"},pl=>{applyRow("dias",pl.eventType==="DELETE"?pl.old:pl.new,pl.eventType==="DELETE");scheduleDash()})
+        .on("postgres_changes",{event:"*",schema:"public",table:"metas"},pl=>{applyRow("metas",pl.eventType==="DELETE"?pl.old:pl.new,pl.eventType==="DELETE");scheduleDash()})
+        .subscribe();
+      // ao voltar para a aba, recarrega (caso o tempo real tenha caído)
+      document.addEventListener("visibilitychange",()=>{if(!document.hidden&&idle())loadAll().catch(()=>{})});
+      return;
+    }catch(e){console.error(e);setStatus("Sem conexão com o banco");mode="local"}
+  }
+  mode="local";
+  try{
+    const s=JSON.parse(localStorage.getItem(LS)||"null");
+    if(s){data=s.dias||{};goals=s.metas||{}}
+  }catch(e){data={};goals={}}
+  setStatus(ok?"Sem conexão, salvando neste navegador":"Salvo neste navegador");
+  refreshAll();
+}
+
+/* ---------- painel ---------- */
+let group="day", hidden=new Set(), charts={}, dashT=null, gw=Math.min(Math.max(CUR,0),NW-1);
+function scheduleDash(){clearTimeout(dashT);dashT=setTimeout(renderDash,200)}
+function rangeDays(){
+  let end=today;
+  Object.keys(data).forEach(ds=>{if(SUBJ.some(s=>v(ds,s.k)>0)&&parse(ds)>end)end=parse(ds)});
+  if(end<FIRST)end=FIRST; if(end>LAST)end=LAST;
+  const out=[];for(let d=FIRST;d<=end;d=addDays(d,1))out.push(iso(d));return out;
+}
+function renderDash(){
+  const days=rangeDays();
+  const dayTot=ds=>SUBJ.reduce((a,s)=>a+v(ds,s.k),0);
+  const all=days.reduce((a,ds)=>a+dayTot(ds),0);
+  const span=Math.max(1,days.length);
+  const studied=days.filter(ds=>dayTot(ds)>0).length;
+  let streak=0;{let i=days.length-1; if(i>=0&&days[i]===TODAY&&dayTot(days[i])===0)i--; for(;i>=0&&dayTot(days[i])>0;i--)streak++;}
+  const cw=Math.min(Math.max(CUR,0),NW-1);
+  let thisWeek=0,ng=0,hit=0;
+  SUBJ.forEach(s=>{const x=weekSum(cw,s.k),m=g(cw,s.k);thisWeek+=x;if(m>0){ng++;if(x>=m)hit++}});
+  $("kpis").innerHTML=[
+    ["Total de exercícios",all,"desde 21 de set"],
+    ["Nesta semana",thisWeek,`semana ${cw+1} de ${NW}`],
+    ["Metas batidas",ng?`${hit} de ${ng}`:"–",ng?"nesta semana":"sem metas nesta semana"],
+    ["Média por dia",(all/span).toFixed(1).replace(".",","),`em ${span} ${span===1?"dia":"dias"}`],
+    ["Dias com exercício",studied,`de ${days.length}`],
+    ["Sequência",streak,streak===1?"dia seguido":"dias seguidos"]
+  ].map(([k,val,x])=>`<div class="kpi"><div class="k">${k}</div><div class="v">${val}</div><div class="x">${x}</div></div>`).join("");
+
+  renderMsgs(dayTot,streak,cw,all);
+  let lt=0;[data,goals].forEach(o=>Object.values(o).forEach(d=>{if(d&&+d._t>lt)lt=+d._t}));
+  if(lt){const d=new Date(lt);$("updated").textContent=`Última atualização do quadro: ${d.getDate()} de ${MES[d.getMonth()]}, ${pad(d.getHours())}h${pad(d.getMinutes())}`}
+  else $("updated").textContent="Quadro ainda sem registros.";
+  if(typeof Chart==="undefined")return;
+  const ink=cssv("--ink"),muted=cssv("--muted"),line=cssv("--line"),font=cssv("--body"),card=cssv("--card");
+  Chart.defaults.color=muted;Chart.defaults.font.family=font;Chart.defaults.borderColor=line;
+  const col=k=>cssv("--"+k);
+  const tip={backgroundColor:card,titleColor:ink,bodyColor:ink,footerColor:ink,borderColor:cssv("--line-strong"),borderWidth:1,padding:10};
+
+  /* metas da semana */
+  $("wLabel").textContent=`Semana ${gw+1}, ${fmtRange(gw)}`;
+  $("wPrev").disabled=gw<=0; $("wNext").disabled=gw>=NW-1;
+  const gm=SUBJ.map(s=>g(gw,s.k)), gd=SUBJ.map(s=>weekSum(gw,s.k));
+  const gng=gm.filter(x=>x>0).length, ghit=gm.filter((m,i)=>m>0&&gd[i]>=m).length;
+  $("goalNote").textContent=gng?`${ghit} de ${gng} metas batidas. Feitos: ${gd.reduce((a,b)=>a+b,0)}, meta total: ${gm.reduce((a,b)=>a+b,0)}`:"";
+  $("goalEmpty").hidden=gng>0||gd.some(x=>x>0);
+  upsert("c0",{type:"bar",data:{labels:SUBJ.map(s=>s.n),datasets:[
+      {label:"Meta",data:gm,grouped:false,order:2,backgroundColor:SUBJ.map(s=>`color-mix(in srgb, ${col(s.k)} 14%, transparent)`),borderColor:SUBJ.map(s=>col(s.k)),borderWidth:2,borderRadius:5,borderSkipped:false,barPercentage:.9,categoryPercentage:.9},
+      {label:"Feito",data:gd,grouped:false,order:1,backgroundColor:SUBJ.map(s=>col(s.k)),borderRadius:4,barPercentage:.5,categoryPercentage:.9}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{...tip,mode:"index",intersect:false,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}`,
+        footer:it=>{const m=gm[it[0].dataIndex],d=gd[it[0].dataIndex];return m?(d>=m?"Meta batida":`Faltam ${m-d}`):"Sem meta"}}}},
+      scales:{x:{beginAtZero:true,ticks:{precision:0},grid:{color:line}},y:{grid:{display:false},ticks:{color:ink}}}}});
+
+  /* por dia / por semana */
+  const vis=SUBJ.filter(s=>!hidden.has(s.k));
+  let labels=[],per={},goalLine=[];
+  SUBJ.forEach(s=>per[s.k]=[]);
+  if(group==="day"){
+    days.forEach(ds=>{const d=parse(ds),w=weekOf(ds);labels.push(`${d.getDate()}/${d.getMonth()+1}`);SUBJ.forEach(s=>per[s.k].push(v(ds,s.k)));
+});
+  }else{
+    const nw=Math.ceil(days.length/7);
+    for(let i=0;i<nw;i++){
+      const a=wkStart(i);labels.push(`Sem ${i+1} (${a.getDate()}/${a.getMonth()+1})`);
+      SUBJ.forEach(s=>{let x=0;for(let j=0;j<7;j++){const ds=iso(addDays(a,j));if(days.includes(ds))x+=v(ds,s.k)}per[s.k].push(x)});
+      const m=vis.reduce((a,s)=>a+g(i,s.k),0);goalLine.push(m||null);
+    }
+  }
+  $("c1key").innerHTML=goalLine.some(x=>x)?`<span><i style="height:0;border-top:2px dashed var(--ink);border-radius:0"></i>Meta da semana</span>`:"";
+  const ds1=vis.map(s=>({type:"bar",label:s.n,data:per[s.k],backgroundColor:col(s.k),borderRadius:3,maxBarThickness:42,stack:"feito",order:2}));
+  if(group==="week")ds1.push({type:"line",label:"Meta",data:goalLine,stack:"meta",order:1,borderColor:ink,backgroundColor:ink,borderDash:[6,4],borderWidth:2,pointRadius:3,pointHoverRadius:4,tension:0,spanGaps:false});
+  upsert("c1",{type:"bar",data:{labels,datasets:ds1},options:{responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{display:false},tooltip:{...tip,mode:"index",intersect:false,filter:i=>i.raw>0,
+      footer:items=>"Total feito: "+items.filter(i=>i.dataset.stack==="feito").reduce((a,i)=>a+i.raw,0)}},
+    scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0,autoSkip:true,autoSkipPadding:10}},y:{stacked:true,beginAtZero:true,ticks:{precision:0},grid:{color:line}}}}});
+
+  const cum=vis.map(s=>{let acc=0;return{label:s.n,data:per[s.k].map(x=>acc+=x),borderColor:col(s.k),backgroundColor:col(s.k),borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0}});
+  upsert("c2",{type:"line",data:{labels,datasets:cum},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{display:false},tooltip:tip},
+    scales:{x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:true,autoSkipPadding:14}},y:{beginAtZero:true,ticks:{precision:0},grid:{color:line}}}}});
+
+  const tots=SUBJ.map(s=>({s,t:per[s.k].reduce((a,b)=>a+b,0)})).sort((a,b)=>b.t-a.t);
+  upsert("c3",{type:"bar",data:{labels:tots.map(o=>o.s.n),datasets:[{data:tots.map(o=>o.t),backgroundColor:tots.map(o=>col(o.s.k)),borderRadius:4,maxBarThickness:26}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>{const sum=tots.reduce((a,o)=>a+o.t,0);return ` ${c.raw} exercícios${sum?` (${Math.round(c.raw/sum*100)}%)`:""}`}}}},
+      scales:{x:{beginAtZero:true,ticks:{precision:0},grid:{color:line}},y:{grid:{display:false},ticks:{color:ink}}}}});
+}
+function renderMsgs(dayTot,streak,cw,all){
+  const out=[];
+  const past=[];for(let d=FIRST;d<=today&&d<=LAST;d=addDays(d,1))past.push(iso(d));
+  const started=today>=FIRST;
+  // sequência
+  if(streak>=7)out.push(["good","🔥",`${streak} dias seguidos!`,"Ritmo de campeão. Não deixa a corrente quebrar."]);
+  else if(streak>=3)out.push(["good","🔥",`${streak} dias seguidos`,`Mais ${7-streak} e fecha uma semana inteira sem parar.`]);
+  // parado
+  let lastIdx=-1;for(let i=past.length-1;i>=0;i--)if(dayTot(past[i])>0){lastIdx=i;break}
+  if(started){
+    const gap=lastIdx<0?past.length:(past.length-1-lastIdx);
+    const todayDone=past.length&&dayTot(past[past.length-1])>0;
+    if(gap>=3)out.push(["warn","⏰",`${gap} dias sem exercício`,"Recomeçar é fácil: escolhe uma matéria e faz 5 exercícios hoje."]);
+    else if(!todayDone&&streak>0)out.push(["info","💪","Ainda falta o de hoje",`Faz os exercícios de hoje pra manter a sequência de ${streak} ${streak===1?"dia":"dias"}.`]);
+    else if(!todayDone)out.push(["info","✏️","Bora começar o dia?","Nenhum exercício anotado hoje ainda."]);
+  }else out.push(["info","🚀","A contagem começa em 21 de setembro","Já dá pra definir as metas da primeira semana."]);
+  // metas da semana
+  if(cw>=0&&cw<NW&&started){
+    const withG=SUBJ.filter(s=>g(cw,s.k)>0);
+    if(!withG.length)out.push(["info","🎯","Sem metas nesta semana","Defina na coluna Semana quanto quer fazer de cada matéria."]);
+    else{
+      const miss=withG.map(s=>({s,f:g(cw,s.k)-weekSum(cw,s.k)})).filter(o=>o.f>0).sort((a,b)=>b.f-a.f);
+      const elapsed=Math.min(7,diff(wkStart(cw),today)+1);
+      const gTot=withG.reduce((a,s)=>a+g(cw,s.k),0), dTot=withG.reduce((a,s)=>a+Math.min(weekSum(cw,s.k),g(cw,s.k)),0);
+      if(!miss.length)out.push(["good","🏆","Todas as metas da semana batidas!","Semana fechada com sucesso. Quer aumentar a meta da próxima?"]);
+      else{
+        const behind=dTot/gTot<(elapsed/7)-0.15;
+        const top=miss[0];
+        out.push([behind?"warn":"info","🎯",behind?"Metas atrasadas nesta semana":`${withG.length-miss.length} de ${withG.length} metas batidas`,
+          `Falta${top.f>1?"m":""} ${top.f} de ${top.s.n}${miss.length>1?` e mais ${miss.length-1} ${miss.length-1===1?"matéria":"matérias"}`:""}. ${8-elapsed>1?`Ainda restam ${7-elapsed+1} dias.`:"Último dia da semana!"}`]);
+      }
+    }
+    // semana passada
+    if(cw>0){
+      const pw=cw-1, pg=SUBJ.filter(s=>g(pw,s.k)>0), ph=pg.filter(s=>weekSum(pw,s.k)>=g(pw,s.k));
+      if(pg.length&&ph.length===pg.length)out.push(["good","⭐","Semana passada: 100% das metas","Continua nesse ritmo."]);
+    }
+  }
+  // matéria esquecida
+  if(past.length>=5&&all>0){
+    const win=past.slice(-7);
+    const idle=SUBJ.filter(s=>win.every(ds=>v(ds,s.k)===0));
+    if(idle.length&&idle.length<SUBJ.length)out.push(["warn","📚",idle.length===1?`${idle[0].n} parada`:idle.length===2?`${idle[0].n} e ${idle[1].n} paradas`:`${idle.length} matérias paradas`,`${idle.length>2?idle.map(s=>s.n).join(", ")+": s":"S"}em exercícios nos últimos ${win.length} dias. Que tal incluir hoje?`]);
+  }
+  // marcos
+  const marks=[1000,750,500,300,200,100,50];
+  const mk=marks.find(m=>all>=m);
+  if(mk)out.push(["good","🏅",`${mk} exercícios!`,`Já são ${all} no total. ${marks.slice().reverse().find(m=>m>all)?`Próximo marco: ${marks.slice().reverse().find(m=>m>all)}.`:""}`]);
+  // reta final
+  const nx=EXAMS.find(e=>diff(today,e.date)>=0);
+  if(nx){const f=diff(today,nx.date);if(f<=10)out.push(["info","🏁",f===0?`Hoje é a prova do ${nx.n}!`:`Reta final: ${f} ${f===1?"dia":"dias"} para o ${nx.n}`,f===0?"Boa prova, Miguel! Respira fundo e confia no treino.":"Revisão e descanso contam também."]);}
+  $("msgs").innerHTML=out.slice(0,5).map(([t,ic,b,sp])=>`<div class="msg ${t}"><span class="ic" aria-hidden="true">${ic}</span><div><b>${b}</b><span>${sp}</span></div></div>`).join("");
+}
+function upsert(id,cfg){
+  if(charts[id]){charts[id].data=cfg.data;charts[id].options=cfg.options;charts[id].update("none");}
+  else charts[id]=new Chart($(id),cfg);
+}
+function buildFilters(){
+  $("filters").innerHTML=SUBJ.map(s=>`<button type="button" aria-pressed="true" data-k="${s.k}" style="--c:var(--${s.k})"><span class="badge">${s.k}</span>${s.n}</button>`).join("");
+  $("filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;
+    if(hidden.has(k))hidden.delete(k);else hidden.add(k);b.setAttribute("aria-pressed",!hidden.has(k));renderDash()};
+  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{
+    group=b.dataset.g;document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    $("c1title").textContent=group==="day"?"Exercícios por dia":"Exercícios por semana";renderDash()});
+  $("wPrev").onclick=()=>{if(gw>0){gw--;renderDash()}};
+  $("wNext").onclick=()=>{if(gw<NW-1){gw++;renderDash()}};
+}
+const resetCharts=()=>{Object.values(charts).forEach(c=>c.destroy());charts={};renderDash()};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",resetCharts);
+new MutationObserver(resetCharts).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+renderExams();buildCal();applyCollapse();buildFilters();refreshAll();initStore();
+</script>
+</body>
+</html>
